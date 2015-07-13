@@ -1,4 +1,4 @@
-!include "driver.nsh"
+!include "x64.nsh"
 
 ;--------------------------------
 ;Include Modern UI
@@ -22,8 +22,11 @@
   RequestExecutionLevel admin
 
 ;--------------------------------
+
 ;Interface Settings
 
+  ShowInstDetails show
+  !define MUI_FINISHPAGE_NOAUTOCLOSE
   !define MUI_ABORTWARNING
   !define MUI_ICON "Raspberry_Pi_Logo.ico"
   !define MUI_UNICON "Raspberry_Pi_Logo.ico"
@@ -55,13 +58,18 @@ Section "Compute Module Boot" SecCmBoot
 
   SetOutPath "$INSTDIR"
 
-  File /r bcm270x-boot-driver
+  File /r drivers
 
-  Push $INSTDIR\bcm270x-boot-driver
-  Push $INSTDIR\bcm270x-boot-driver\bcm270x.inf
-  Push "USB\VID_0A5C&PID_2763"
+  DetailPrint "Installing BCM270x driver..."
 
-  Call InstallUpgradeDriver
+  ${If} ${RunningX64}
+    ExecWait '"$INSTDIR\drivers\dpinst64.exe" /c /sa /sw /PATH "$INSTDIR\drivers"' $0
+  ${Else}
+    ExecWait '"$INSTDIR\drivers\dpinst32.exe" /c /sa /sw /PATH "$INSTDIR\drivers"' $0
+  ${EndIf}
+
+  DetailPrint "Driver install returned $0"
+
 
   File buildroot.elf
   File cyggcc_s-1.dll
@@ -74,9 +82,6 @@ Section "Compute Module Boot" SecCmBoot
   CreateDirectory $SMPROGRAMS\ComputeModuleBoot
   CreateShortcut "$SMPROGRAMS\ComputeModuleBoot\RPi Boot.lnk" "$INSTDIR\rpiboot.exe"
   CreateShortcut "$SMPROGRAMS\ComputeModuleBoot\Uninstall RPi Boot.lnk" "$INSTDIR\Uninstall.exe"
-  CreateShortcut "$SMPROGRAMS\NSIS\ZIP2EXE project workspace.lnk" \
-    "$INSTDIR\source\zip2exe\zip2exe.dsw"
-
 
   ;Store installation folder
   WriteRegStr HKCU "Software\Compute Module Boot" "" $INSTDIR
@@ -102,7 +107,16 @@ SectionEnd
 
 Section "Uninstall"
 
-  RmDir /r /REBOOTOK $INSTDIR\bcm270x-boot-driver
+  DetailPrint "Removing driver..."
+ 
+  ${If} ${RunningX64}
+    ExecWait '"$INSTDIR\drivers\dpinst64.exe" /c /sa /sw /U "$INSTDIR\drivers\bcm270x.inf"' $0
+  ${Else}
+    ExecWait '"$INSTDIR\drivers\dpinst32.exe" /c /sa /sw /U "$INSTDIR\drivers\bcm270x.inf"' $0
+  ${EndIf}
+
+
+  RmDir /r /REBOOTOK $INSTDIR\drivers
 
   Delete $INSTDIR\Uninstall.exe
   Delete $INSTDIR\buildroot.elf
