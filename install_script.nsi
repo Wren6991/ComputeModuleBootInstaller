@@ -58,20 +58,18 @@ Section "Compute Module Boot" SecCmBoot
 
   SetOutPath "$INSTDIR"
 
-  File /r drivers
+  File /r redist
 
-  DetailPrint "Installing BCM270x driver..."
-
-  ${If} ${RunningX64}
-    ExecWait '"$INSTDIR\drivers\dpinst64.exe" /c /sa /sw /PATH "$INSTDIR\drivers"' $0
-  ${Else}
-    ExecWait '"$INSTDIR\drivers\dpinst32.exe" /c /sa /sw /PATH "$INSTDIR\drivers"' $0
-  ${EndIf}
-
+  DetailPrint "Installing BCM2708 driver..."
+  ExecWait '"$INSTDIR\redist\wdi-simple.exe" -v 0x0a5c -p 0x2763 -t 0' $0 
+  DetailPrint "Driver install returned $0"
+  
+  DetailPrint "Installing BCM2710 driver..."
+  ExecWait '"$INSTDIR\redist\wdi-simple.exe" -v 0x0a5c -p 0x2764 -t 0' $0 
   DetailPrint "Driver install returned $0"
 
-
   File buildroot.elf
+  File buildroot.patch
   File cyggcc_s-1.dll
   File cygusb-1.0.dll
   File cygwin1.dll
@@ -107,19 +105,11 @@ SectionEnd
 
 Section "Uninstall"
 
-  DetailPrint "Removing driver..."
- 
-  ${If} ${RunningX64}
-    ExecWait '"$INSTDIR\drivers\dpinst64.exe" /c /sa /sw /U "$INSTDIR\drivers\bcm270x.inf"' $0
-  ${Else}
-    ExecWait '"$INSTDIR\drivers\dpinst32.exe" /c /sa /sw /U "$INSTDIR\drivers\bcm270x.inf"' $0
-  ${EndIf}
-
-
-  RmDir /r /REBOOTOK $INSTDIR\drivers
+  RmDir /r /REBOOTOK $INSTDIR\redist
 
   Delete $INSTDIR\Uninstall.exe
   Delete $INSTDIR\buildroot.elf
+  Delete $INSTDIR\buildroot.patch
   Delete $INSTDIR\cyggcc_s-1.dll
   Delete $INSTDIR\cygusb-1.0.dll
   Delete $INSTDIR\cygwin1.dll
