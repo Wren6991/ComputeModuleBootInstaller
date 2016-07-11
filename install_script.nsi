@@ -69,7 +69,6 @@ Section "Compute Module Boot" SecCmBoot
   DetailPrint "Driver install returned $0"
 
   File buildroot.elf
-  File buildroot.patch
   File cyggcc_s-1.dll
   File cygusb-1.0.dll
   File cygwin1.dll
@@ -109,7 +108,6 @@ Section "Uninstall"
 
   Delete $INSTDIR\Uninstall.exe
   Delete $INSTDIR\buildroot.elf
-  Delete $INSTDIR\buildroot.patch
   Delete $INSTDIR\cyggcc_s-1.dll
   Delete $INSTDIR\cygusb-1.0.dll
   Delete $INSTDIR\cygwin1.dll
