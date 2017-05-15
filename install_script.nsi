@@ -9,7 +9,7 @@
 ;General
 
   ;Name and file
-  Name "Compute Module Boot Flasher"
+  Name "Compute Module Boot Tool"
   OutFile "ComputeModuleBoot.exe"
 
   ;Default installation folder
@@ -59,6 +59,7 @@ Section "Compute Module Boot" SecCmBoot
   SetOutPath "$INSTDIR"
 
   File /r redist
+  File /r msd
 
   DetailPrint "Installing BCM2708 driver..."
   ExecWait '"$INSTDIR\redist\wdi-simple.exe" -v 0x0a5c -p 0x2763 -t 0' $0 
@@ -68,14 +69,11 @@ Section "Compute Module Boot" SecCmBoot
   ExecWait '"$INSTDIR\redist\wdi-simple.exe" -v 0x0a5c -p 0x2764 -t 0' $0 
   DetailPrint "Driver install returned $0"
 
-  File buildroot.elf
   File cyggcc_s-1.dll
   File cygusb-1.0.dll
   File cygwin1.dll
-  File msd.elf
   File rpiboot.exe
-  File usbbootcode.bin
-
+  
   CreateDirectory $SMPROGRAMS\ComputeModuleBoot
   CreateShortcut "$SMPROGRAMS\ComputeModuleBoot\RPi Boot.lnk" "$INSTDIR\rpiboot.exe"
   CreateShortcut "$SMPROGRAMS\ComputeModuleBoot\Uninstall RPi Boot.lnk" "$INSTDIR\Uninstall.exe"
@@ -105,15 +103,13 @@ SectionEnd
 Section "Uninstall"
 
   RmDir /r /REBOOTOK $INSTDIR\redist
+  RmDir /r /REBOOTOK $INSTDIR\msd
 
   Delete $INSTDIR\Uninstall.exe
-  Delete $INSTDIR\buildroot.elf
   Delete $INSTDIR\cyggcc_s-1.dll
   Delete $INSTDIR\cygusb-1.0.dll
   Delete $INSTDIR\cygwin1.dll
-  Delete $INSTDIR\msd.elf
   Delete $INSTDIR\rpiboot.exe
-  Delete $INSTDIR\usbbootcode.bin
 
   RmDir /REBOOTOK $INSTDIR
 
